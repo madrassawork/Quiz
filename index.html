@@ -15,7 +15,7 @@ h1{font-size:1.15rem;margin:8px 0}
 .o{display:block;width:100%;text-align:left;font:inherit;color:inherit;background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:12px;margin:8px 0}
 .o.ok{background:var(--ok);border-color:var(--ac)}.o.no{background:var(--no)}
 .b{font:inherit;background:var(--ac);color:#fff;border:0;border-radius:10px;padding:12px 20px;margin-top:12px}
-.m{color:var(--mu);font-size:.9rem}
+.m{color:var(--mu);font-size:.9rem}.t{float:right;font-weight:700;color:var(--ac)}.t.lo{color:#d33}
 .big{font-size:2.4rem;font-weight:700;color:var(--ac);text-align:center}
 .r{border-top:1px solid var(--bd);padding:8px 0;font-size:.95rem}
 </style></head><body><div class="w">
@@ -51,29 +51,30 @@ const Q=[
 ["സൂറതുൽ അഹ്സാബ് 33:36 പ്രകാരം അല്ലാഹുവും റസൂലും ഒരു കാര്യത്തിൽ തീരുമാനമെടുത്താൽ വിശ്വാസികൾക്ക്?",["സ്വതന്ത്രമായ അഭിപ്രായം ഉണ്ടായിരിക്കാവുന്നതല്ല","സ്വന്തം അഭിപ്രായം പറയാം","തീരുമാനം വൈകിക്കാം","സുഹൃത്തുക്കളോട് ആലോചിക്കാം"]]
 ];
 const A=document.getElementById('a'),P=document.getElementById('p');
-let i=0,s=0,log=[],D;
+let i=0,s=0,log=[],D,T,L,tot=0,t0;const SEC=30;
 function sh(a){a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
-function start(){i=0;s=0;log=[];D=Q.map(q=>({q:q[0],c:q[1][0],o:sh(q[1])}));show()}
+function start(){i=0;s=0;log=[];tot=0;D=Q.map(q=>({q:q[0],c:q[1][0],o:sh(q[1])}));show()}
 function show(){
  if(i>=D.length)return end();
  P.style.width=(i/D.length*100)+'%';
  const d=D[i];
- A.innerHTML='<div class="c"><div class="m">ചോദ്യം '+(i+1)+' / '+D.length+'</div><p class="q">'+d.q+'</p>'+d.o.map((t,k)=>'<button class="o" data-k="'+k+'">'+t+'</button>').join('')+'<div id="n"></div></div>';
+ A.innerHTML='<div class="c"><div class="m"><span class="t" id="tm">⏱ '+SEC+'</span>ചോദ്യം '+(i+1)+' / '+D.length+'</div><p class="q">'+d.q+'</p>'+d.o.map((t,k)=>'<button class="o" data-k="'+k+'">'+t+'</button>').join('')+'<div id="n"></div></div>';
  A.querySelectorAll('.o').forEach(b=>b.onclick=()=>pick(b,d));
+ L=SEC;t0=Date.now();clearInterval(T);T=setInterval(()=>{L--;const e=document.getElementById('tm');if(e){e.textContent='⏱ '+L;e.classList.toggle('lo',L<=5)}if(L<=0){clearInterval(T);pick(null,d)}},1000);
 }
-function pick(b,d){
+function pick(b,d){clearInterval(T);tot+=Math.round((Date.now()-t0)/1000);
  const bs=A.querySelectorAll('.o');
  bs.forEach(x=>{x.disabled=true;if(x.textContent===d.c)x.classList.add('ok')});
- const right=b.textContent===d.c;
- if(right)s++;else b.classList.add('no');
- log.push([d.q,b.textContent,d.c,right]);
+ const right=!!b&&b.textContent===d.c;
+ if(right)s++;else if(b)b.classList.add('no');
+ log.push([d.q,b?b.textContent:'സമയം കഴിഞ്ഞു',d.c,right]);
  document.getElementById('n').innerHTML='<button class="b" id="nx">'+(i==D.length-1?'ഫലം കാണുക':'അടുത്തത്')+'</button>';
  document.getElementById('nx').onclick=()=>{i++;show()};
 }
 function end(){
  P.style.width='100%';
  const w=log.filter(l=>!l[3]);
- A.innerHTML='<div class="c"><div class="big">'+s+' / '+D.length+'</div><p class="m" style="text-align:center">'+(s>=22?'മാഷാ അല്ലാഹ്! മികച്ച പ്രകടനം':s>=15?'നല്ല പ്രകടനം, ഒന്നുകൂടി ഉറപ്പിക്കാം':'ഒന്നുകൂടി വായിച്ച് വീണ്ടും ശ്രമിക്കുക')+'</p>'+
+ A.innerHTML='<div class="c"><div class="big">'+s+' / '+D.length+'</div><p class="m" style="text-align:center">ആകെ സമയം: '+Math.floor(tot/60)+' മിനിറ്റ് '+(tot%60)+' സെക്കൻഡ്</p><p class="m" style="text-align:center">'+(s>=22?'മാഷാ അല്ലാഹ്! മികച്ച പ്രകടനം':s>=15?'നല്ല പ്രകടനം, ഒന്നുകൂടി ഉറപ്പിക്കാം':'ഒന്നുകൂടി വായിച്ച് വീണ്ടും ശ്രമിക്കുക')+'</p>'+
  (w.length?'<h3>തെറ്റിയവ</h3>'+w.map(l=>'<div class="r"><b>'+l[0]+'</b><br>നിങ്ങളുടെ ഉത്തരം: '+l[1]+'<br>ശരി: '+l[2]+'</div>').join(''):'')+
  '<button class="b" id="re">വീണ്ടും ശ്രമിക്കുക</button></div>';
  document.getElementById('re').onclick=start;
